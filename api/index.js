@@ -2,7 +2,7 @@ const express = require('express');
 const ytSearch = require('yt-search');
 const axios = require('axios');
 const cookieParser = require('cookie-parser');
-const session = require('express-session');
+const cookieSession = require('cookie-session'); // <-- Cambiado aquí
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -10,13 +10,13 @@ const PORT = process.env.PORT || 8080;
 app.set('json spaces', 2);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(cookieParser());
-app.use(session({
-    secret: 'secreto-sebas-2026',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 }
+
+// Configuración de sesión ligera perfecta para Vercel Serverless
+app.use(cookieSession({
+    name: 'sebas_session',
+    keys: ['secreto-sebas-2026'],
+    maxAge: 24 * 60 * 60 * 1000 // 24 horas
 }));
 
 const USUARIO_VALIDO = "Luisrojas30921@gmail.com";
@@ -30,9 +30,11 @@ function requerirLogin(req, res, next) {
     }
 }
 
+// ==========================================
 // RUTA: LOGIN
+// ==========================================
 app.get('/login', (req, res) => {
-    if (req.session.usuario) return res.redirect('/');
+    if (req.session && req.session.usuario) return res.redirect('/');
     res.send(`
         <!DOCTYPE html>
         <html lang="es">
@@ -87,11 +89,13 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/logout', (req, res) => {
-    req.session.destroy();
+    req.session = null; // Cierra la sesión limpiando la cookie
     res.redirect('/login');
 });
 
-// RUTA: DASHBOARD
+// ==========================================
+// RUTA: DASHBOARD INTERACTIVO
+// ==========================================
 app.get('/', requerirLogin, (req, res) => {
     res.send(`
         <!DOCTYPE html>
@@ -178,7 +182,9 @@ app.get('/', requerirLogin, (req, res) => {
     `);
 });
 
+// ==========================================
 // ENDPOINTS
+// ==========================================
 app.get('/api/search/yt', requerirLogin, async (req, res) => {
     const query = req.query.query;
     if (!query) return res.status(400).json({ status: false, error: "Falta el parámetro 'query'" });
@@ -197,7 +203,6 @@ app.get('/api/download/tiktok', requerirLogin, async (req, res) => {
     } catch (error) { res.status(500).json({ status: false }); }
 });
 
-// EXPORTACIÓN OBLIGATORIA PARA VERCEL
 module.exports = app;
 
 if (process.env.NODE_ENV !== 'production') {
