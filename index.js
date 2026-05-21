@@ -1,6 +1,6 @@
 const express = require('express');
 const ytSearch = require('yt-search');
-const sharp = require('sharp');
+//const sharp = require('sharp');
 const axios = require('axios');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
