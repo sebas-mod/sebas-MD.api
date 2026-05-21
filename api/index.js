@@ -30,9 +30,7 @@ function requerirLogin(req, res, next) {
     }
 }
 
-// ==========================================
 // RUTA: LOGIN
-// ==========================================
 app.get('/login', (req, res) => {
     if (req.session.usuario) return res.redirect('/');
     res.send(`
@@ -93,9 +91,7 @@ app.get('/logout', (req, res) => {
     res.redirect('/login');
 });
 
-// ==========================================
-// RUTA: DASHBOARD INTERACTIVO
-// ==========================================
+// RUTA: DASHBOARD
 app.get('/', requerirLogin, (req, res) => {
     res.send(`
         <!DOCTYPE html>
@@ -182,9 +178,7 @@ app.get('/', requerirLogin, (req, res) => {
     `);
 });
 
-// ==========================================
 // ENDPOINTS
-// ==========================================
 app.get('/api/search/yt', requerirLogin, async (req, res) => {
     const query = req.query.query;
     if (!query) return res.status(400).json({ status: false, error: "Falta el parámetro 'query'" });
@@ -203,6 +197,7 @@ app.get('/api/download/tiktok', requerirLogin, async (req, res) => {
     } catch (error) { res.status(500).json({ status: false }); }
 });
 
+// EXPORTACIÓN OBLIGATORIA PARA VERCEL
 module.exports = app;
 
 if (process.env.NODE_ENV !== 'production') {
