@@ -2,7 +2,7 @@ const express = require('express');
 const ytSearch = require('yt-search');
 const axios = require('axios');
 const cookieParser = require('cookie-parser');
-const cookieSession = require('cookie-session'); // <-- Cambiado aquí
+const cookieSession = require('cookie-session');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -12,10 +12,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Configuración de sesión ligera perfecta para Vercel Serverless
+// Configuración de sesión con PATH absoluto para evitar el bug de base path
 app.use(cookieSession({
     name: 'sebas_session',
     keys: ['secreto-sebas-2026'],
+    path: '/', // <-- Esto obliga a usar la raíz absoluta y destruye el error del log
     maxAge: 24 * 60 * 60 * 1000 // 24 horas
 }));
 
@@ -89,7 +90,7 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/logout', (req, res) => {
-    req.session = null; // Cierra la sesión limpiando la cookie
+    req.session = null;
     res.redirect('/login');
 });
 
